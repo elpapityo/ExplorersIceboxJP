@@ -51,62 +51,80 @@ jobs:
         run: |
           set -euo pipefail
           test -s "$ZIP"
-          python3 - <<'PY'
+          python3 - <<'PY2'
           import json, os, zipfile
-          path = os.environ['ZIP']
-          with zipfile.ZipFile(path) as z:
-              names = set(z.namelist())
-              required = ('ExplorersIceboxJP.dll', 'ExplorersIceboxJP.json', 'images/icon.png')
-              missing = [name for name in required if name not in names]
-              if missing:
-                  raise SystemExit(f'配布ZIP内の必須ファイルがありません: {missing}; ZIP内容: {sorted(names)}')
-              if z.getinfo('images/icon.png').file_size == 0:
-                  raise SystemExit('images/icon.png が空です')
-              manifest = json.loads(z.read('ExplorersIceboxJP.json').decode('utf-8-sig'))
-          expected = os.environ['VERSION'] + '.0'
-          actual = manifest.get('AssemblyVersion')
-          if actual != expected:
-              raise SystemExit(f'AssemblyVersion mismatch: ZIP={actual!r}, filename={expected!r}')
-          print(f'配布ZIP検証OK: AssemblyVersion={actual}, icon=images/icon.png')
-          PY
 
-      - name: Sync pluginmaster and icon
+          zip_path = os.environ['ZIP']
+          version = os.environ['VERSION']
+
+          with zipfile.ZipFile(zip_path) as z:
+              names = z.namelist()
+              normalized = {name.replace('\\', '/'): name for name in names}
+              required = ['ExplorersIceboxJP.dll', 'ExplorersIceboxJP.json', 'images/icon.png']
+              missing = [name for name in required if name not in normalized]
+              if missing:
+                  raise SystemExit(f'Missing required files: {missing}')
+
+              manifest = json.loads(z.read(normalized['ExplorersIceboxJP.json']).decode('utf-8-sig'))
+              expected = version + '.0'
+              actual = manifest.get('AssemblyVersion')
+              if actual != expected:
+                  raise SystemExit(f'AssemblyVersion mismatch: ZIP={actual!r}, filename={expected!r}')
+              if manifest.get('InternalName') != 'ExplorersIceboxJP':
+                  raise SystemExit(f"InternalName mismatch: {manifest.get('InternalName')!r}")
+
+              os.makedirs('images', exist_ok=True)
+              with open('images/icon.png', 'wb') as out:
+                  out.write(z.read(normalized['images/icon.png']))
+
+          print(f'Verified AssemblyVersion: {actual}')
+          print('Verified InternalName: ExplorersIceboxJP')
+          print('Verified and extracted images/icon.png')
+          PY2
+
+      - name: Sync pluginmaster and version
         shell: bash
         env:
-          ZIP: ${{ steps.pkg.outputs.zip }}
           VERSION: ${{ steps.pkg.outputs.version }}
         run: |
           set -euo pipefail
-          mkdir -p images
-          unzip -p "$ZIP" images/icon.png > images/icon.png
-          test -s images/icon.png
-          python3 - <<'PY'
+          python3 - <<'PY2'
           import json, os
           from pathlib import Path
 
           version = os.environ['VERSION']
+          assembly = f'{version}.0'
+          url = f'https://github.com/elpapityo/ExplorersIceboxJP/releases/download/V{version}/ExplorersIceboxJP_v{version}.zip'
+          icon = f'https://raw.githubusercontent.com/elpapityo/ExplorersIceboxJP/main/images/icon.png?v={version}'
+
           path = Path('pluginmaster.json')
           data = json.loads(path.read_text(encoding='utf-8-sig'))
           if not isinstance(data, list) or not data:
               raise SystemExit('pluginmaster.json must contain a non-empty JSON array')
           entry = data[0]
-          url = f'https://github.com/elpapityo/ExplorersIceboxJP/releases/download/V{version}/ExplorersIceboxJP_v{version}.zip'
-          entry['AssemblyVersion'] = f'{version}.0'
+          entry['InternalName'] = 'ExplorersIceboxJP'
+          entry['AssemblyVersion'] = assembly
           entry['DownloadLinkInstall'] = url
           entry['DownloadLinkUpdate'] = url
           entry['DownloadLinkTesting'] = url
-          entry['IconUrl'] = f'https://raw.githubusercontent.com/elpapityo/ExplorersIceboxJP/main/images/icon.png?v={version}'
+          entry['IconUrl'] = icon
           path.write_text(json.dumps(data, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
-          print(f"Synced pluginmaster.json -> {version}.0")
-          PY
-          git add pluginmaster.json images/icon.png
-          if ! git diff --cached --quiet -- pluginmaster.json images/icon.png; then
-            git config user.name "github-actions[bot]"
-            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git commit -m "Sync pluginmaster and icon for v${VERSION}"
+          Path('VERSION.txt').write_text(version + '\n', encoding='utf-8')
+          print(f'Synced metadata -> ExplorersIceboxJP {assembly}')
+          PY2
+
+      - name: Commit synchronized files
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add pluginmaster.json VERSION.txt images/icon.png
+          if ! git diff --cached --quiet; then
+            git commit -m "Sync ExplorersIceboxJP release files"
             git push
           else
-            echo "pluginmaster.json and icon already match v${VERSION}."
+            echo "Release metadata already synchronized."
           fi
 
       - name: Create or replace release asset
