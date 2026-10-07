@@ -9,7 +9,11 @@
     "AssemblyVersion": "0.1.0.0",
     "RepoUrl": "https://github.com/elpapityo/ExplorersIceboxJP",
     "ApplicableVersion": "any",
-    "Tags": ["無人島開拓", "Island Sanctuary", "素材収集"],
+    "Tags": [
+      "無人島開拓",
+      "Island Sanctuary",
+      "素材収集"
+    ],
     "DalamudApiLevel": 15,
     "LoadPriority": 0,
     "IconUrl": "https://raw.githubusercontent.com/elpapityo/ExplorersIceboxJP/main/images/icon.png?v=0.1.0",
