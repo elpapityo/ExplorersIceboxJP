@@ -1,0 +1,8 @@
+﻿<Project Sdk="Microsoft.NET.Sdk"><PropertyGroup><TargetFramework>net472</TargetFramework><LangVersion>latest</LangVersion><AssemblyName>MachiaVillainJPDirect</AssemblyName></PropertyGroup><ItemGroup>
+<Reference Include="BepInEx.Core"><HintPath>$(GameDir)\BepInEx\core\BepInEx.Core.dll</HintPath></Reference>
+<Reference Include="BepInEx.Unity.Mono"><HintPath>$(GameDir)\BepInEx\core\BepInEx.Unity.Mono.dll</HintPath></Reference>
+<Reference Include="UnityEngine"><HintPath>$(GameDir)\MachiaVillain_Data\Managed\UnityEngine.dll</HintPath></Reference>
+<Reference Include="UnityEngine.CoreModule"><HintPath>$(GameDir)\MachiaVillain_Data\Managed\UnityEngine.CoreModule.dll</HintPath></Reference>
+<Reference Include="UnityEngine.IMGUIModule"><HintPath>$(GameDir)\MachiaVillain_Data\Managed\UnityEngine.IMGUIModule.dll</HintPath></Reference>
+<Reference Include="UnityEngine.TextRenderingModule"><HintPath>$(GameDir)\MachiaVillain_Data\Managed\UnityEngine.TextRenderingModule.dll</HintPath></Reference>
+</ItemGroup></Project>
