@@ -80,6 +80,26 @@ jobs:
           print(f'Verified AssemblyVersion: {actual}')
           print('Verified InternalName: ExplorersIceboxJP')
           print('Verified and extracted images/icon.png')
+
+          # ZIP entry names must use forward slashes for Dalamud package paths.
+          import tempfile, shutil
+          tmp = tempfile.NamedTemporaryFile(delete=False, suffix='.zip')
+          tmp.close()
+          with zipfile.ZipFile(zip_path, 'r') as src, zipfile.ZipFile(tmp.name, 'w') as dst:
+              seen = set()
+              for info in src.infolist():
+                  fixed = info.filename.replace('\\', '/')
+                  if fixed in seen:
+                      raise SystemExit(f'Duplicate ZIP entry after path normalization: {fixed}')
+                  seen.add(fixed)
+                  data = src.read(info.filename)
+                  new_info = zipfile.ZipInfo(fixed, date_time=info.date_time)
+                  new_info.compress_type = zipfile.ZIP_DEFLATED
+                  new_info.external_attr = info.external_attr
+                  new_info.comment = info.comment
+                  dst.writestr(new_info, data)
+          shutil.move(tmp.name, zip_path)
+          print('Normalized ZIP entry paths to forward slashes')
           PY2
 
       - name: Sync pluginmaster and version
