@@ -1,0 +1,23 @@
+[
+  {
+    "Author": "Ice / JP custom by Elpa",
+    "Name": "ExplorersIceboxJP",
+    "Punchline": "無人島開拓のレベル上げ・素材収集を自動化します。",
+    "Description": "無人島開拓でのレベル上げや素材収集を支援する日本語化カスタム版です。vnavmesh と Lifestream が必要です。",
+    "Changelog": "v0.1.0: ExplorersIceboxJP 初回公開。日本語UI、収集リスト、畑の水やり、牧場の餌やり・収穫などの補助機能を追加。",
+    "InternalName": "ExplorersIceboxJP",
+    "AssemblyVersion": "0.1.0.0",
+    "RepoUrl": "https://github.com/elpapityo/ExplorersIceboxJP",
+    "ApplicableVersion": "any",
+    "Tags": ["無人島開拓", "Island Sanctuary", "素材収集"],
+    "DalamudApiLevel": 15,
+    "LoadPriority": 0,
+    "IconUrl": "https://raw.githubusercontent.com/elpapityo/ExplorersIceboxJP/main/images/icon.png?v=0.1.0",
+    "ImageUrls": [],
+    "DownloadLinkInstall": "https://github.com/elpapityo/ExplorersIceboxJP/releases/download/V0.1.0/ExplorersIceboxJP_v0.1.0.zip",
+    "DownloadLinkUpdate": "https://github.com/elpapityo/ExplorersIceboxJP/releases/download/V0.1.0/ExplorersIceboxJP_v0.1.0.zip",
+    "DownloadLinkTesting": "https://github.com/elpapityo/ExplorersIceboxJP/releases/download/V0.1.0/ExplorersIceboxJP_v0.1.0.zip",
+    "IsHide": false,
+    "IsTestingExclusive": false
+  }
+]
