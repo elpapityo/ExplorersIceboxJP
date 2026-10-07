@@ -53,6 +53,7 @@ jobs:
           test -s "$ZIP"
           unzip -l "$ZIP" | grep -q 'ExplorersIceboxJP.dll'
           unzip -l "$ZIP" | grep -q 'ExplorersIceboxJP.json'
+          unzip -l "$ZIP" | grep -q 'images/icon.png'
           unzip -p "$ZIP" ExplorersIceboxJP.json > /tmp/ExplorersIceboxJP.json
           python3 - <<'PY'
           import json, os
@@ -65,12 +66,16 @@ jobs:
           print(f'Verified AssemblyVersion: {actual}')
           PY
 
-      - name: Sync pluginmaster to uploaded version
+      - name: Sync pluginmaster and icon
         shell: bash
         env:
+          ZIP: ${{ steps.pkg.outputs.zip }}
           VERSION: ${{ steps.pkg.outputs.version }}
         run: |
           set -euo pipefail
+          mkdir -p images
+          unzip -p "$ZIP" images/icon.png > images/icon.png
+          test -s images/icon.png
           python3 - <<'PY'
           import json, os
           from pathlib import Path
@@ -90,14 +95,14 @@ jobs:
           path.write_text(json.dumps(data, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
           print(f"Synced pluginmaster.json -> {version}.0")
           PY
-          if ! git diff --quiet -- pluginmaster.json; then
+          if ! git diff --quiet -- pluginmaster.json images/icon.png; then
             git config user.name "github-actions[bot]"
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git add pluginmaster.json
-            git commit -m "Sync pluginmaster for v${VERSION}"
+            git add pluginmaster.json images/icon.png
+            git commit -m "Sync pluginmaster and icon for v${VERSION}"
             git push
           else
-            echo "pluginmaster.json already matches v${VERSION}."
+            echo "pluginmaster.json and icon already match v${VERSION}."
           fi
 
       - name: Create or replace release asset
