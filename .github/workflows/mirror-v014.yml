@@ -1,6 +1,10 @@
 name: Mirror ExplorersIceboxJP v0.1.4 release
 
 on:
+  push:
+    branches: [ main ]
+    paths:
+      - ".github/workflows/mirror-v014.yml"
   workflow_dispatch:
 
 permissions:
